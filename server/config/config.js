@@ -12,6 +12,7 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
 // Base de datos
 // ===========================
 let urlDB;
+console.log('El dato: ', process.env.NODE_ENV);
 if ((process.env.NODE_ENV = 'dev')) {
 	urlDB = 'mongodb://localhost:27017/cafe';
 } else {
