@@ -12,12 +12,13 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
 // Base de datos
 // ===========================
 let urlDB;
-console.log('El dato: ', process.env.NODE_ENV);
 if (process.env.NODE_ENV === 'dev') {
 	urlDB = 'mongodb://localhost:27017/cafe';
 } else {
 	urlDB =
 		'mongodb+srv://khalaharia:qpiiKkY57yyuEC5k@cluster0.rmwsw.mongodb.net/cafe';
 }
+
+console.log('La URL seleccionada: ', urlDB);
 
 process.env.URLDB = urlDB;
