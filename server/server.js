@@ -14,7 +14,9 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // controllers
-app.use(require('./controllers/usuario'));
+// app.use(require('./controllers/usuario'));
+// app.use(require('./controllers/login'));
+app.use(require('./controllers/index'));
 
 console.log(`Cadena de conexión: ${process.env.URLDB.yellow}`.grey);
 
