@@ -6,7 +6,6 @@ const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.CLIENT_ID);
 
 const Usuario = require('../models/usuario');
-const usuario = require('../models/usuario');
 const app = express();
 
 app.post('/login', (req, res) => {
@@ -14,32 +13,18 @@ app.post('/login', (req, res) => {
 
 	Usuario.findOne({ email: body.email }, (err, usuarioDb) => {
 		if (err) {
-			return res.status(500).json({
-				ok: false,
-				err: err,
-			});
+			return generarError(res, 500, err);
 		}
 
 		if (!usuarioDb) {
-			return res.status(400).json({
-				ok: false,
-				err: { message: 'Usuario o contraseña incorrectos' },
-			});
+			return generarError(res, 400, 'Usuario o contraseña incorrectos');
 		}
 
 		if (!bcrypt.compareSync(body.password, usuarioDb.password)) {
-			return res.status(400).json({
-				ok: false,
-				err: { message: 'Usuario o (contraseña) incorrectos' },
-			});
+			return generarError(res, 400, 'Usuario o contraseña incorrectos');
 		}
 
-		// expires in 30 days
-		let token = jwt.sign({ usuario: usuarioDb }, process.env.SEED, {
-			expiresIn: process.env.CADUCIDAD_TOKEN,
-		});
-
-		res.json({ ok: true, usuario: usuarioDb, token: token });
+		generarRespuesta(usuarioDb, res);
 	});
 });
 
@@ -70,30 +55,24 @@ app.post('/google', async (req, res) => {
 	let token = req.body.idtoken;
 
 	let googleUser = await verify(token).catch((err) => {
-		return res.status(403).json({ ok: false, err: err });
+		return generarError(res, 403, err);
 	});
 
 	Usuario.findOne({ email: googleUser.email }, (err, usuarioDb) => {
 		if (err) {
-			return res.status(500).json({
-				ok: false,
-				err: err,
-			});
+			return generarError(res, 500, err);
 		}
 
 		if (usuarioDb) {
 			if (usuarioDb.google === false) {
-				return res.status(400).json({
-					ok: false,
-					err: { message: 'Debe usar su autenticación normal (no Google)' },
-				});
+				return generarError(
+					res,
+					500,
+					'Debe usar su autenticación normal (no Google)'
+				);
 			} else {
 				// Si el usuario es de google, le renovamos el token
-				let token = jwt.sign({ usuario: usuarioDb }, process.env.SEED, {
-					expiresIn: process.env.CADUCIDAD_TOKEN,
-				});
-
-				return res.json({ ok: true, usuario: usuarioDb, token });
+				generarRespuesta(usuarioDb, res);
 			}
 		} else {
 			// The user doesn't exists in the db
@@ -107,24 +86,27 @@ app.post('/google', async (req, res) => {
 
 			usuario.save((err, usuarioDb) => {
 				if (err) {
-					return res.status(500).json({
-						ok: false,
-						err: err,
-					});
+					return generarError(res, 500, err);
 				}
-
-				let token = jwt.sign({ usuario: usuarioDb }, process.env.SEED, {
-					expiresIn: process.env.CADUCIDAD_TOKEN,
-				});
-
-				// console.log('Hello');
-
-				return res.json({ ok: true, usuario: usuarioDb, token });
+				generarRespuesta(usuarioDb, res);
 			});
 		}
 	});
-
-	// res.json({ usuario: googleUser });
 });
+
+let generarRespuesta = (usuarioDb, res) => {
+	let token = jwt.sign({ usuario: usuarioDb }, process.env.SEED, {
+		expiresIn: process.env.CADUCIDAD_TOKEN,
+	});
+
+	return res.json({ ok: true, usuario: usuarioDb, token });
+};
+
+let generarError = (res, statusCode, text) => {
+	return res.status(statusCode).json({
+		ok: false,
+		err: { message: text },
+	});
+};
 
 module.exports = app;
