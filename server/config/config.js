@@ -35,3 +35,10 @@ if (process.env.NODE_ENV === 'dev') {
 console.log('La URL seleccionada: ', urlDB);
 
 process.env.URLDB = urlDB;
+
+// ===========================
+// GOOGLE CLIENT ID
+// ===========================
+process.env.CLIENT_ID =
+	process.env.CLIENT_ID ||
+	'289268215414-6gbccmg3q0vrqut0le6vofbe3dupg9td.apps.googleusercontent.com';

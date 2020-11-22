@@ -4,6 +4,8 @@ require('colors');
 const express = require('express');
 const app = express();
 
+const path = require('path');
+
 // Mongo DB connection
 const mongoose = require('mongoose');
 
@@ -12,6 +14,9 @@ const bodyParser = require('body-parser');
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
+
+// habilitar carpeta public acceso global
+app.use(express.static(path.resolve(__dirname, '../public')));
 
 // controllers
 // app.use(require('./controllers/usuario'));
